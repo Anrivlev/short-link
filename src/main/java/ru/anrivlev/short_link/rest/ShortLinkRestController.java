@@ -1,43 +1,41 @@
 package ru.anrivlev.short_link.rest;
 
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.anrivlev.short_link.model.ShortLink;
+import ru.anrivlev.short_link.entities.ShortLink;
 import ru.anrivlev.short_link.service.ShortLinkService;
+import ru.anrivlev.short_link.service.ShortUrlGenerator;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 public class ShortLinkRestController {
     @Autowired
     ShortLinkService shortLinkService;
 
-    @GetMapping(value = "/short-link/{id}")
-    public ResponseEntity<ShortLink> getShortLink(
-            @PathVariable(value = "id") Long id
+    @GetMapping(name = "/short-link/")
+    public ResponseEntity<String> getNewShortLink(
+            @RequestParam(name = "uuid") String uuid,
+            @RequestParam(name = "url") String fullUrl,
+            @RequestParam(name = "usages") Integer usages,
+            @RequestParam(name = "hours") Integer hours
     ) {
-        Optional<ShortLink> shortLink = shortLinkService.getShortLink(id);
-        return shortLink.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity
-                        .notFound()
-                        .build());
+        Duration duration = Duration.ofHours(hours);
+        ShortLink shortLink = shortLinkService.getNewShortLink(uuid, fullUrl, usages, duration);
+        return ResponseEntity.ok(shortLink.getShortUrl());
     }
 
-    @PostMapping(value = "/short-link/")
-    public ResponseEntity<Long> saveShortLink(
-            @RequestBody ShortLink shortLink
+    @GetMapping(name = "/{shortUrl}")
+    public ResponseEntity<String> useShortLink(
+            @RequestParam(name = "uuid") String uuid,
+            @PathVariable(name = "shortUrl") String shortUrl
     ) {
-        ShortLink savedShortLink = shortLinkService.saveShortLink(shortLink);
-        return ResponseEntity.ok(savedShortLink.getId());
-    }
 
-    @DeleteMapping(value = "/short-link/{id}")
-    public ResponseEntity<Boolean> deleteShortLink(
-            @PathVariable(value = "id") Long id
-    ) {
-        Boolean isDeleted = shortLinkService.deleteShortLink(id);
-        if (!isDeleted) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(true);
+        return null;
     }
 }

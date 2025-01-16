@@ -1,15 +1,14 @@
-package ru.anrivlev.short_link.model;
+package ru.anrivlev.short_link.entities;
 
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-@Entity()
-@Table(name = "short_links")
+@Entity(name="short_links")
 public class ShortLink {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    private int id;
 
     @Column(name = "fullUrl")
     private String fullUrl;
@@ -38,11 +37,11 @@ public class ShortLink {
     public ShortLink() {
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
