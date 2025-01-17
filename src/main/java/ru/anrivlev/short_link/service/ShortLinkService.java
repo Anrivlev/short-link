@@ -11,6 +11,7 @@ import ru.anrivlev.short_link.repo.ShortLinkRepository;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -21,8 +22,11 @@ public class ShortLinkService {
     @Autowired
     ShortUrlGenerator shortUrlGenerator;
 
-    @Value("short-link.hours")
-    Integer shortLinkMaxHours;
+    @Autowired
+    FullUrlService fullUrlService;
+
+    @Value("${short-link.hours}")
+    private Integer shortLinkMaxHours;
 
     public Optional<ShortLink> getShortLink(long id) {
         return shortLinkRepository.findById(id);
@@ -32,7 +36,7 @@ public class ShortLinkService {
         return shortLinkRepository.save(shortLink);
     }
 
-    public boolean deleteShortLink(long id) {
+    public boolean markShortUrlAsDeleted(long id) {
         Optional<ShortLink> shortLink = shortLinkRepository.findById(id);
         if (shortLink.isEmpty()) return false;
         shortLinkRepository.deleteById(id);
@@ -66,5 +70,35 @@ public class ShortLinkService {
         ShortLink savedShortLink = shortLinkRepository.save(shortLink);
         savedShortLink.setShortUrl(shortUrlGenerator.getShortUrl(savedShortLink.getId()));
         return shortLinkRepository.save(savedShortLink);
+    }
+
+    public String getPageWithShortLink(
+            String uuid,
+            String shortUrl
+    ) {
+        int id = shortUrlGenerator.getId(shortUrl);
+        Optional<ShortLink> optionalShortLink = getShortLink(id);
+        if (optionalShortLink.isEmpty()) return null;
+        ShortLink shortLink = optionalShortLink.get();
+        if (!Objects.equals(shortLink.getUserId(), uuid)) return null;
+        if (shortLink.isDeleted()) return null;
+        if (shortLink.getExpirationDate().isBefore(LocalDateTime.now())) return null;
+        if (shortLink.getUsages() == shortLink.getMaxUsages()) return null;
+        shortLink.setUsages(shortLink.getUsages() + 1);
+        saveShortLink(shortLink);
+        return fullUrlService.getPage(shortLink.getFullUrl());
+    }
+
+    public Boolean markShortUrlAsDeleted(
+            String uuid, String shortUrl
+    ) {
+        int id = shortUrlGenerator.getId(shortUrl);
+        Optional<ShortLink> optionalShortLink = getShortLink(id);
+        if (optionalShortLink.isEmpty()) return false;
+        ShortLink shortLink = optionalShortLink.get();
+        if (!Objects.equals(shortLink.getUserId(), uuid)) return false;
+        shortLink.setDeleted(true);
+        saveShortLink(shortLink);
+        return true;
     }
 }

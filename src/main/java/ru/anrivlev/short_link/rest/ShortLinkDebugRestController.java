@@ -35,7 +35,7 @@ public class ShortLinkDebugRestController {
     public ResponseEntity<Boolean> deleteShortLink(
             @PathVariable(value = "id") Long id
     ) {
-        boolean isDeleted = shortLinkService.deleteShortLink(id);
+        boolean isDeleted = shortLinkService.markShortUrlAsDeleted(id);
         if (!isDeleted) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(true);
     }
