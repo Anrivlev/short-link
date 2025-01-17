@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import ru.anrivlev.short_link.entities.ShortLink;
 
 @Repository
-public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
+public interface ShortLinkRepository extends JpaRepository<ShortLink, Integer> {
 }

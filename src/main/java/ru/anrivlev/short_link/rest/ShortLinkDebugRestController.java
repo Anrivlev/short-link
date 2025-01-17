@@ -14,7 +14,7 @@ public class ShortLinkDebugRestController {
 
     @GetMapping(value = "/debug/short-link/{id}")
     public ResponseEntity<ShortLink> getShortLink(
-            @PathVariable(value = "id") Long id
+            @PathVariable(value = "id") int id
     ) {
         Optional<ShortLink> shortLink = shortLinkService.getShortLink(id);
         return shortLink.map(ResponseEntity::ok)
@@ -33,7 +33,7 @@ public class ShortLinkDebugRestController {
 
     @DeleteMapping(value = "/debug/short-link/{id}")
     public ResponseEntity<Boolean> deleteShortLink(
-            @PathVariable(value = "id") Long id
+            @PathVariable(value = "id") int id
     ) {
         boolean isDeleted = shortLinkService.markShortUrlAsDeleted(id);
         if (!isDeleted) return ResponseEntity.notFound().build();

@@ -28,7 +28,10 @@ public class ShortLinkService {
     @Value("${short-link.hours}")
     private Integer shortLinkMaxHours;
 
-    public Optional<ShortLink> getShortLink(long id) {
+    @Value("${short-link.usages}")
+    private Integer shortLinkMaxUsages;
+
+    public Optional<ShortLink> getShortLink(int id) {
         return shortLinkRepository.findById(id);
     }
 
@@ -36,7 +39,7 @@ public class ShortLinkService {
         return shortLinkRepository.save(shortLink);
     }
 
-    public boolean markShortUrlAsDeleted(long id) {
+    public boolean markShortUrlAsDeleted(int id) {
         Optional<ShortLink> shortLink = shortLinkRepository.findById(id);
         if (shortLink.isEmpty()) return false;
         shortLinkRepository.deleteById(id);
@@ -62,7 +65,10 @@ public class ShortLinkService {
         shortLink.setFullUrl(fullUrl);
         shortLink.setDeleted(false);
         shortLink.setUsages(0);
-        shortLink.setMaxUsages(maxUsages);
+        if (maxUsages != null && maxUsages < shortLinkMaxUsages)
+            shortLink.setMaxUsages(maxUsages);
+        else
+            shortLink.setMaxUsages(shortLinkMaxUsages);
         shortLink.setUserId(uuid);
         LocalDateTime creationDate = LocalDateTime.now();
         shortLink.setCreationDate(creationDate);

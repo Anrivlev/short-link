@@ -35,7 +35,7 @@ public class ShortLinkRestController {
         return ResponseEntity.ok(page);
     }
 
-    @DeleteMapping(value = "/{shortUrl}")
+    @DeleteMapping(value = "/delete/{shortUrl}")
     public ResponseEntity<Boolean> deleteShortLink(
             @RequestParam(name = "uuid") String uuid,
             @PathVariable(name = "shortUrl") String shortUrl
